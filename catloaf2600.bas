@@ -31,7 +31,23 @@ DECLARE SUB AddDoor(x AS INTEGER, y AS INTEGER, doortype AS INTEGER)
 DECLARE SUB HideDoor(doortype AS INTEGER)
 DECLARE SUB ShowDoor(doortype AS INTEGER)
 
-OPTION EXPLICIT
+#include once "SDL2/SDL.bi"
+
+dim shared gfxWindow as SDL_Window ptr
+dim shared gfxRenderer as SDL_Renderer ptr
+dim shared gfxSprites as SDL_Texture ptr
+dim shared SCREEN_X	as integer = 320
+dim shared SCREEN_Y	as integer = 200
+
+DECLARE SUB GFX_FillBox(x0 as integer, y0 as integer, x1 as integer, y1 as integer, col as integer)
+
+#include once "gfont.bas"
+
+dim shared game_font as GFONT
+
+dim shared keydown as integer
+
+'OPTION EXPLICIT
 
 TYPE tSprite
     
@@ -82,6 +98,39 @@ DIM SHARED map(40, 40) AS INTEGER
 DIM SHARED gameover AS INTEGER
 DIM SHARED starttime AS INTEGER
 DIM SHARED totaltime AS INTEGER
+
+DECLARE SUB _LOCATE(y AS INTEGER = -1, x AS INTEGER = -1)
+DECLARE SUB _PRINT(text AS STRING, cr AS INTEGER = 1)
+DECLARE SUB _COLOR(foreground AS INTEGER = -1, background AS INTEGER = -1)
+DECLARE SUB _CLS()
+DECLARE SUB _WAIT_FOR_KEY()
+DECLARE SUB _CLEAR_KEYS()
+DECLARE SUB _SLEEP()
+DECLARE SUB _COPY_SCREEN()
+DECLARE SUB _PULL_EVENTS()
+
+DIM SHARED rgbs(15) AS INTEGER
+rgbs( 0) = &h000000
+rgbs( 1) = &h0000bb
+rgbs( 2) = &h00bb00
+rgbs( 3) = &h00bbbb
+rgbs( 4) = &hbb0000
+rgbs( 5) = &hbb00bb
+rgbs( 6) = &hbb7700
+rgbs( 7) = &hbbbbbb
+rgbs( 8) = &h777777
+rgbs( 9) = &h7777ff
+rgbs(10) = &h77ff77
+rgbs(11) = &h77ffff
+rgbs(12) = &hff7777
+rgbs(13) = &hff00ff
+rgbs(14) = &hffff00
+rgbs(15) = &hffffff
+
+DIM SHARED loc_x AS INTEGER
+DIM SHARED loc_y AS INTEGER
+DIM SHARED col_f AS INTEGER
+DIM SHARED col_b AS INTEGER
 
 CONST TRUE = 1
 CONST FALSE = 0
@@ -139,7 +188,7 @@ DO
     
     GAME_Intro
 
-    CLS
+    _CLS
 
     '- reset player
     Player.x = 2: Player.y = 2
@@ -180,7 +229,7 @@ SUB GAME_Main
     GAME_DrawPlayer
     
     '- clear keyboard buffer
-    DO: LOOP UNTIL INKEY$ = ""
+    _CLEAR_KEYS
     starttime = TIMER
     quitgame = FALSE
     totaltime = -1
@@ -201,18 +250,20 @@ SUB GAME_Main
                 player.dark = 1
             END IF
             
-            COLOR , 4
-            GFX_WriteText "[    YOU GOT PWNED!!!    ]", 4, 15
-            SLEEP
-            COLOR , 1
+            _COLOR , 4
+            GFX_WriteText "[    YOU GOT PWNED!!!    ]", 4, 15: _COPY_SCREEN
+            _SLEEP
+            _COLOR , 1
             
             Player.lives = Player.lives - 1
             GFX_WriteText "[        LIVES: " + STR$(Player.lives) + "        ]", 4, 15
-            COLOR , 0
+            _COLOR , 0
             GAME_DrawPlayer
             
-            DO: LOOP UNTIL INKEY$ = ""
-            DO: LOOP WHILE INKEY$ = ""
+            _COPY_SCREEN
+            
+            _CLEAR_KEYS
+            _WAIT_FOR_KEY
                         
             IF Player.lives <= 0 THEN
                 GAME_GameOver
@@ -220,38 +271,41 @@ SUB GAME_Main
             ELSE
                 Player.life = 100
                 GAME_BackstepPlayer
-                IF player.dark = 1 THEN CLS ELSE GAME_DrawMap
+                IF player.dark = 1 THEN _CLS ELSE GAME_DrawMap
                 GAME_DrawPlayer
             END IF
             
         END IF
-       
-        DO: strKey = INKEY$: LOOP WHILE strKey = ""
+        
+        _COPY_SCREEN
+        _WAIT_FOR_KEY
     
-        IF strKey = CHR$(255) + "M" OR UCASE$(strKey) = "L" THEN GAME_MovePlayer  1,  0
-        IF strKey = CHR$(255) + "K" OR UCASE$(strKey) = "J" THEN GAME_MovePlayer -1,  0
-        IF strKey = CHR$(255) + "P" OR UCASE$(strKey) = "K" THEN GAME_MovePlayer  0,  1
-        IF strKey = CHR$(255) + "H" OR UCASE$(strKey) = "I" THEN GAME_MovePlayer  0, -1
+        IF keydown = SDLK_RIGHT or keydown = SDLK_L THEN GAME_MovePlayer  1,  0
+        IF keydown = SDLK_LEFT  or keydown = SDLK_J THEN GAME_MovePlayer -1,  0
+        IF keydown = SDLK_DOWN  or keydown = SDLK_K THEN GAME_MovePlayer  0,  1
+        IF keydown = SDLK_UP    or keydown = SDLK_I THEN GAME_MovePlayer  0, -1
         
         IF player.x > 7 THEN player.x = 0: player.gridx = player.gridx + 8: GAME_DrawMap: GAME_UpdatePlayer
         IF player.x < 0 THEN player.x = 7: player.gridx = player.gridx - 8: GAME_DrawMap: GAME_UpdatePlayer
         IF player.y > 4 THEN player.y = 0: player.gridy = player.gridy + 5: GAME_DrawMap: GAME_UpdatePlayer
         IF player.y < 0 THEN player.y = 4: player.gridy = player.gridy - 5: GAME_DrawMap: GAME_UpdatePlayer
     
-        IF strKey = CHR$(9) OR UCASE$(strKey) = "V" THEN GAME_ShowInventory: GAME_DrawMap
-        IF strKey = CHR$(255) + ";" OR UCASE$(strKey) = "H" THEN GAME_ShowHelp: GAME_DrawMap
-        IF strKey = CHR$(27) OR UCASE$(strKey) = "Q" THEN
+        IF keydown = SDLK_TAB or keydown = SDLK_V THEN GAME_ShowInventory: GAME_DrawMap
+        IF keydown = SDLK_H THEN GAME_ShowHelp: GAME_DrawMap
+        IF keydown = SDLK_ESCAPE or keydown = SDLK_Q THEN
             
-            COLOR , 1
+            _COLOR , 1
             GFX_WriteText "[    QUIT GAME? (Y/N)    ]", 4, 15
-            COLOR , 0
+            _COLOR , 0
+            
+            _COPY_SCREEN
             
             DO
             
-                DO: strKey = INKEY$: LOOP WHILE strKey = ""
+                _WAIT_FOR_KEY
                 
-                IF UCASE$(strKey) = "Y" THEN quitgame = TRUE: EXIT DO
-                IF UCASE$(strKey) = "N" THEN quitgame = FALSE: EXIT DO
+                IF keydown = SDLK_Y THEN quitgame = TRUE: EXIT DO
+                IF keydown = SDLK_N THEN quitgame = FALSE: EXIT DO
                 
             LOOP
             
@@ -269,22 +323,22 @@ END SUB
 
 SUB GAME_ShowInventory
     
-    CLS
+    _CLS
     
     GFX_WriteText "INVENTORY", 3, 15
     
-    LOCATE 6, 2
-    PRINT "LIVES: " + STR$(player.lives)
+    _LOCATE 6, 2
+    _PRINT "LIVES: " + STR$(player.lives)
     
-    LOCATE 10, 2
-    COLOR 14: PRINT "GOLD KEYS  : " + STR$(player.inv.goldkeys)
-    LOCATE 11, 2
-    COLOR 7: PRINT "SILVER KEYS: " + STR$(player.inv.silvkeys)
-    LOCATE 12, 2
-    COLOR 8: PRINT "STONE KEYS : " + STR$(player.inv.stnkeys)
+    _LOCATE 10, 2
+    _COLOR 14: _PRINT "GOLD KEYS  : " + STR$(player.inv.goldkeys)
+    _LOCATE 11, 2
+    _COLOR 7: _PRINT "SILVER KEYS: " + STR$(player.inv.silvkeys)
+    _LOCATE 12, 2
+    _COLOR 8: _PRINT "STONE KEYS : " + STR$(player.inv.stnkeys)
     
-    LOCATE 10, 26
-    COLOR 15: PRINT "SPECIAL ITEMS"
+    _LOCATE 10, 26
+    _COLOR 15: _PRINT "SPECIAL ITEMS"
     DIM y AS INTEGER: y = 11
     IF player.inv.golddove = 1 THEN GFX_DrawSprite 30, y, GOLDENDOVE: y = y + 5
     IF player.inv.suprmeye = 1 THEN GFX_DrawSprite 30, y, SUPREMEEYE: y = y + 5
@@ -292,7 +346,6 @@ SUB GAME_ShowInventory
     
     DIM seconds AS INTEGER
     DIM minutes AS INTEGER
-    DIM strKey AS STRING
     
     DO
     
@@ -303,11 +356,12 @@ SUB GAME_ShowInventory
         DIM s AS STRING
         s = STRING$(2 - LEN(STR$(seconds)), "0")
         
-        LOCATE 20, 2
-        COLOR 15: PRINT "ELAPSED TIME: " + STR$(minutes) + ":" + s + STR$(seconds)
+        _LOCATE 20, 2
+        _COLOR 15: _PRINT "ELAPSED TIME: " + STR$(minutes) + ":" + s + STR$(seconds)
     
-        strKey = INKEY$
-        IF strKey <> "" THEN EXIT DO
+        _COPY_SCREEN
+        _PULL_EVENTS
+        IF keydown THEN EXIT DO
         
     LOOP
     
@@ -320,7 +374,7 @@ END SUB
 '-\
 SUB GAME_ShowHelp
     
-    CLS
+    _CLS
     
     GFX_WriteText "Use arrow keys or (I,J,K,L) to move", 1, 15
     GFX_WriteText "Press TAB (or V) to view inventory", 3, 15
@@ -328,24 +382,26 @@ SUB GAME_ShowHelp
     GFX_WriteText "Basic Obstacles:", 5, 15
     
     GFX_DrawSprite 2, 5, TRAP
-    COLOR 15, 0
-    LOCATE 7, 8: PRINT "TRAP - Avoid these at all cost!"
+    _COLOR 15, 0
+    _LOCATE 7, 8: _PRINT "TRAP - Avoid these at all cost!"
     
     GFX_DrawSprite 2, 10, DOORGOLD
     GFX_DrawSprite 36, 10, KEYGOLD
-    COLOR 15, 0
-    LOCATE 12, 8: PRINT "GOLD DOOR   - Opens with key"
+    _COLOR 15, 0
+    _LOCATE 12, 8: _PRINT "GOLD DOOR   - Opens with key"
     
     GFX_DrawSprite 2, 16, DOORSILVER
     GFX_DrawSprite 36, 16, KEYSILVER
-    COLOR 15, 0
-    LOCATE 18, 8: PRINT "SILVER DOOR - Opens with key"
+    _COLOR 15, 0
+    _LOCATE 18, 8: _PRINT "SILVER DOOR - Opens with key"
     
     GFX_DrawSprite 2, 21, LIGHTOFF
-    COLOR 15, 0
-    LOCATE 23, 8: PRINT "LIGHTSWITCH - Turns off lights"
+    _COLOR 15, 0
+    _LOCATE 23, 8: _PRINT "LIGHTSWITCH - Turns off lights"
     
-    DO: LOOP WHILE INKEY$ = ""
+    _COPY_SCREEN
+    _CLEAR_KEYS
+    _WAIT_FOR_KEY
     
 END SUB
 
@@ -356,7 +412,7 @@ END SUB
 '-\
 SUB GAME_ShowAbout
     
-    CLS
+    _CLS
     
     GFX_WriteText "CATLOAF 2600", 3, 15
     
@@ -368,7 +424,8 @@ SUB GAME_ShowAbout
     GFX_WriteText " No, this game was NOT made by Atari", 22, 7
     GFX_WriteText "It is a joke for nostalgia's sake", 23, 7
     
-    SLEEP
+    _COPY_SCREEN
+    _SLEEP
     
 END SUB
 
@@ -503,7 +560,7 @@ SUB GAME_MovePlayer (x AS INTEGER, y AS INTEGER)
             GAME_ENDLEVEL
         CASE LIGHTOFF
             player.dark = 1
-            CLS
+            _CLS
         CASE LIGHTON
             player.dark = 0
         CASE ELSE
@@ -555,7 +612,7 @@ SUB GAME_DrawMap
     DIM x AS INTEGER, y AS INTEGER
     DIM sp AS INTEGER
     
-    IF player.dark = 1 THEN CLS: RETURN
+    IF player.dark = 1 THEN _CLS: RETURN
     
     FOR y = 0 TO 4
         FOR x = 0 TO 7
@@ -576,12 +633,96 @@ END SUB
 '-\
 SUB SYS_Init
     
-    SCREEN 13, 0, 0, 1
-    SETMOUSE ,,0
-    COLOR 15
+    SDL_Init( SDL_INIT_VIDEO )
+	
+	gfxWindow = SDL_CreateWindow( "Window Name", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 0, 0, SDL_WINDOW_FULLSCREEN_DESKTOP )
+	gfxRenderer = SDL_CreateRenderer( gfxWindow, -1, SDL_RENDERER_SOFTWARE )
+	'SCREEN_X = int(SCREEN_Y*(SDL_GetWindowSurface(gfxWindow)->w/SDL_GetWindowSurface(gfxWindow)->h)) '// this resizes the width for widescreen or 3:4 screens
+	SDL_RenderSetLogicalSize( gfxRenderer, SCREEN_X, SCREEN_Y )
+	SDL_SetRenderDrawBlendMode( gfxRenderer, SDL_BLENDMODE_BLEND )
+	
+	game_font.load("font.bmp", 256, 24, 8, 8, GFONT_W/8)
+	SDL_ShowCursor( 0 )
     
     DATA_LoadSprites
     
+END SUB
+
+SUB _COLOR(foreground as integer = -1, background as integer = -1)
+
+	if foreground >= 0 then col_f = rgbs(foreground)
+	if background >= 0 then col_b = rgbs(background)
+	
+	game_font.setFontColor(col_f)
+
+END SUB
+
+SUB _LOCATE(y as integer, x as integer)
+
+	if x >= 0 then loc_x = x-1
+	if y >= 0 then loc_y = y-1
+
+END SUB
+
+SUB _PRINT(text as string, cr AS INTEGER = 1)
+
+	GFX_FillBox loc_x*GFONT_W, loc_y*GFONT_H, loc_x*GFONT_W+len(text)*GFONT_W, loc_y*GFONT_H+GFONT_H, col_b
+    game_font.writeText(text, loc_x*GFONT_W, loc_y*GFONT_H)
+	
+	IF cr then
+		loc_y += 1
+	else
+		loc_x += len(text)
+	end if
+
+END SUB
+
+SUB _CLS()
+
+	SDL_SetRenderDrawColor( gfxRenderer, 0, 0, 0, SDL_ALPHA_OPAQUE ): SDL_RenderClear( gfxRenderer )
+	loc_x = 0: loc_y = 0
+
+END SUB
+
+SUB _PULL_EVENTS()
+
+	dim event as SDL_Event
+	
+	keydown = 0
+
+	while( SDL_PollEvent( @event ) )
+		select case event.type
+		case SDL_QUIT_
+			end
+		case SDL_KEYDOWN
+			keydown = event.key.keysym.sym
+		end select
+	wend
+
+END SUB
+
+SUB _WAIT_FOR_KEY()
+
+	DO: _PULL_EVENTS(): LOOP WHILE keydown = 0
+
+END SUB
+
+SUB _CLEAR_KEYS()
+
+	DO: _PULL_EVENTS(): LOOP WHILE keydown <> 0
+
+END SUB
+
+SUB _SLEEP()
+
+	_WAIT_FOR_KEY
+
+END SUB
+
+SUB _COPY_SCREEN()
+
+	SDL_RenderPresent( gfxRenderer )
+
 END SUB
 
 '- Shutdown
@@ -604,43 +745,47 @@ END SUB
 SUB MENU_Main
     
     DIM n AS INTEGER
-    
-    CLS
+    DIM key AS INTEGER
     
     DO
     
-        DO: LOOP UNTIL INKEY$ = ""
+		_CLEAR_KEYS
+		
+		_CLS
     
-        COLOR 15
-        PRINT "****************************************";
-        PRINT "*                                      *";
-        PRINT "*                                      *";
-        PRINT "*                                      *";
-        PRINT "****************************************";
+        _COLOR 15
+        _PRINT "****************************************"
+        _PRINT "*                                      *"
+        _PRINT "*                                      *"
+        _PRINT "*                                      *"
+        _PRINT "****************************************"
         FOR n = 1 TO 14
-            PRINT "|   |                              |   |";
+            _PRINT "|   |                              |   |"
         NEXT n
-        PRINT "----------------------------------------";
-        PRINT "|   |                              |   |";
-        PRINT "|   |                              |   |";
-        PRINT "|   |                              |   |";
-        PRINT "|   |                              |   |";
-        PRINT "----------------------------------------";
+        _PRINT "----------------------------------------"
+        _PRINT "|   |                              |   |"
+        _PRINT "|   |                              |   |"
+        _PRINT "|   |                              |   |"
+        _PRINT "|   |                              |   |"
+        _PRINT "----------------------------------------"
         GFX_DrawSprite 18, 8, CATLOAF
         GFX_WriteText "CATLOAF 2600", 3, 14
         GFX_WriteText "1981 ATARI", 18, 9
         GFX_WriteText "F1 How to Play", 21, 7
         GFX_WriteText "press space to begin", 23, 14
         GFX_WriteText "esc to exit", 24, 8
-            
-        DIM strKey AS STRING
-        DO: strKey = INKEY$: LOOP WHILE strKey = ""
         
-        IF strKey = CHR$(255) + ";" OR UCASE$(strKey) = "H" THEN GAME_ShowHelp
-        IF strKey = CHR$(255) + "<" OR UCASE$(strKey) = "A" THEN GAME_ShowAbout
-        IF strKey = CHR$(27) THEN gameover = TRUE: EXIT DO
-        IF strKey = " " THEN EXIT DO
-
+        _COPY_SCREEN
+            
+        _WAIT_FOR_KEY
+        
+        key = keydown
+        
+        IF key = SDLK_H THEN GAME_ShowHelp
+        IF key = SDLK_A THEN GAME_ShowAbout
+        IF key = SDLK_ESCAPE THEN gameover = TRUE: EXIT DO
+        IF key = SDLK_SPACE THEN EXIT DO
+        
     LOOP
 
 END SUB
@@ -652,7 +797,7 @@ END SUB
 '-\
 SUB GAME_Intro
     
-    CLS
+    _CLS
     
     'DrawSprite 3, 7, 0
     'DrawSprite 33, 7, 1
@@ -660,10 +805,10 @@ SUB GAME_Intro
     
     GFX_WriteText "MASTER  MEATLOAF", 3, 4
     
-    SLEEP: LOCATE 14, 1: PRINT SPACE$(40);: GFX_WriteText "CATLOAF!", 14, 15
-    SLEEP: LOCATE 14, 1: PRINT SPACE$(40);: GFX_WriteText "I have survived your predecessors...", 14, 15
-    SLEEP: LOCATE 14, 1: PRINT SPACE$(40);: GFX_WriteText "...and I will survive you!", 14, 15
-    SLEEP
+    _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "CATLOAF!", 14, 15
+    _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "I have survived your predecessors...", 14, 15
+    _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "...and I will survive you!", 14, 15
+    _COPY_SCREEN: _SLEEP
     
 END SUB
 
@@ -678,7 +823,7 @@ SUB GAME_EndLevel
     
     DIM numItems AS INTEGER
         
-    CLS
+    _CLS
     
     totaltime = TIMER - starttime
     numItems = player.inv.golddove + player.inv.suprmeye + player.inv.crystsnk
@@ -687,38 +832,38 @@ SUB GAME_EndLevel
     
     GFX_WriteText "MASTER  MEATLOAF", 3, 4
     
-    SLEEP: LOCATE 14, 1: PRINT SPACE$(40);: GFX_WriteText "CATLOAF!", 14, 15
-    SLEEP: LOCATE 14, 1: PRINT SPACE$(40);: GFX_WriteText "You have survived my labyrinth...", 14, 15
-    SLEEP: LOCATE 14, 1: PRINT SPACE$(40);: GFX_WriteText "...which takes much skill.", 14, 15
+    _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "CATLOAF!", 14, 15
+    _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "You have survived my labyrinth...", 14, 15
+    _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "...which takes much skill.", 14, 15
     
     IF totaltime >= 300 THEN
-        SLEEP: LOCATE 14, 1: PRINT SPACE$(40);: GFX_WriteText "But you have taken too much time.", 14, 15
-        SLEEP: LOCATE 14, 1: PRINT SPACE$(40);: GFX_WriteText "Complete my labyrinth...", 14, 15
-        SLEEP: LOCATE 14, 1: PRINT SPACE$(40);: GFX_WriteText "...in less than 5 minutes.", 14, 15
-        SLEEP: LOCATE 14, 1: PRINT SPACE$(40);: GFX_WriteText "Only then can prove your l33tness.", 14, 15
+        _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "But you have taken too much time.", 14, 15
+        _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "Complete my labyrinth...", 14, 15
+        _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "...in less than 5 minutes.", 14, 15
+        _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "Only then can prove your l33tness.", 14, 15
     ELSEIF numItems < 3 THEN
-        SLEEP: LOCATE 14, 1: PRINT SPACE$(40);: GFX_WriteText "But there is more than meets the eye.", 14, 15
-        SLEEP: LOCATE 14, 1: PRINT SPACE$(40);: GFX_WriteText "There are 3 special items within.", 14, 15
+        _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "But there is more than meets the eye.", 14, 15
+        _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "There are 3 special items within.", 14, 15
         IF numItems = 0 THEN
-            SLEEP: LOCATE 14, 1: PRINT SPACE$(40);: GFX_WriteText "You have none.", 14, 15
-            SLEEP: LOCATE 14, 1: PRINT SPACE$(40);: GFX_WriteText "You must find them...", 14, 15
+            _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "You have none.", 14, 15
+            _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "You must find them...", 14, 15
         ELSE
-            SLEEP: LOCATE 14, 1: PRINT SPACE$(40);: GFX_WriteText "You only have " + STR$(numItems) + ".", 14, 15
-            SLEEP: LOCATE 14, 1: PRINT SPACE$(40);: GFX_WriteText "You must find the rest...", 14, 15
+            _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "You only have " + STR$(numItems) + ".", 14, 15
+            _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "You must find the rest...", 14, 15
         END IF
-        SLEEP: LOCATE 14, 1: PRINT SPACE$(40);: GFX_WriteText "...to prove your l33tness.", 14, 15
+        _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "...to prove your l33tness.", 14, 15
     ELSE
-        SLEEP: LOCATE 14, 1: PRINT SPACE$(40);: GFX_WriteText "Good job.", 14, 15
-        SLEEP: LOCATE 14, 1: PRINT SPACE$(40);: GFX_WriteText "I am not worthy of you.", 14, 15
-        SLEEP: LOCATE 14, 1: PRINT SPACE$(40);: GFX_WriteText "...", 14, 15
-        SLEEP: LOCATE 14, 1: PRINT SPACE$(40);: GFX_WriteText "What's a matter?", 14, 15
-        SLEEP: LOCATE 14, 1: PRINT SPACE$(40);: GFX_WriteText "Were you expecting a fight...", 14, 15
-        SLEEP: LOCATE 14, 1: PRINT SPACE$(40);: GFX_WriteText "...or an epic boss battle?", 14, 15
-        SLEEP: LOCATE 14, 1: PRINT SPACE$(40);: GFX_WriteText "MUWAHAHA!!!", 14, 15
-        SLEEP: LOCATE 14, 1: PRINT SPACE$(40);: GFX_WriteText "Think again!", 14, 15
+        _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "Good job.", 14, 15
+        _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "I am not worthy of you.", 14, 15
+        _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "...", 14, 15
+        _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "What's a matter?", 14, 15
+        _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "Were you expecting a fight...", 14, 15
+        _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "...or an epic boss battle?", 14, 15
+        _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "MUWAHAHA!!!", 14, 15
+        _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "Think again!", 14, 15
     END IF
     
-    SLEEP
+    _SLEEP
     
     GAME_GameOver
 
@@ -736,7 +881,7 @@ SUB GAME_GameOver
     DIM strTime AS STRING
     DIm numItems AS INTEGER
     
-    CLS
+    _CLS
     
     GFX_WriteText "GAME  OVER", 8, 12
     
@@ -757,21 +902,21 @@ SUB GAME_GameOver
         numItems = player.inv.golddove + player.inv.suprmeye + player.inv.crystsnk
         IF numItems < 3 THEN
             
-            SLEEP
-            CLS
+            _SLEEP
+            _CLS
             GFX_WriteText "You forgot something", 4, 15
             
             IF player.inv.golddove = 0 THEN
                 GFX_DrawSprite 18, 7, GOLDENDOVE
-                COLOR 14: LOCATE 9, 3: PRINT"Golden Dove"
+                _COLOR 14: _LOCATE 9, 3: _PRINT "Golden Dove"
             END IF
             IF player.inv.suprmeye = 0 THEN
                 GFX_DrawSprite 18, 12, SUPREMEEYE
-                COLOR  9: LOCATE 14, 3: PRINT"Supreme Eye"
+                _COLOR  9: _LOCATE 14, 3: _PRINT"Supreme Eye"
             END IF
             IF player.inv.crystsnk = 0 THEN
                 GFX_DrawSprite 18, 17, CRYSTALSNK
-                COLOR 10: LOCATE 19, 3: PRINT"Crystal Snake"
+                _COLOR 10: _LOCATE 19, 3: _PRINT"Crystal Snake"
             END IF
             
             IF numItems = 2 THEN
@@ -782,8 +927,8 @@ SUB GAME_GameOver
         
         ELSE
             
-            SLEEP
-            CLS
+            _SLEEP
+            _CLS
             GFX_WriteText "CONGRATULATIONS!", 4, 15
             GFX_WriteText "You found all the secret items", 6, 15
             
@@ -802,7 +947,7 @@ SUB GAME_GameOver
         
     END IF
     
-    SLEEP
+    _SLEEP
     
     gameover = TRUE
     
@@ -825,9 +970,9 @@ SUB GFX_DrawSprite(x AS INTEGER, y AS INTEGER, n AS INTEGER)
     IF x >= 0 AND x < 40 AND y >= 0 AND y < 25 THEN
     
         FOR row = 0 TO 4
-            COLOR sprite(n).col(row, 0), sprite(n).col(row, 1)
-            LOCATE y+row, x
-            PRINT sprite(n).strData(row);
+            _COLOR sprite(n).col(row, 0), sprite(n).col(row, 1)
+            _LOCATE y+row, x
+            _PRINT sprite(n).strData(row), 0
         NEXT row
         
     END IF
@@ -852,11 +997,20 @@ SUB GFX_WriteText(text AS STRING, y AS INTEGER, col AS INTEGER)
     l = LEN(text)
     x = 20 - (l / 2)
     
-    COLOR col
+    _COLOR col
     
-    LOCATE y, x+1
-    PRINT text
+    _LOCATE y, x+1
+    _PRINT text
     
+END SUB
+
+SUB GFX_FillBox(x0 as integer, y0 as integer, x1 as integer, y1 as integer, col as integer)
+
+	DIM rect as SDL_rect = (x0, y0, x1-x0+1, y1-y0+1)
+	
+	SDL_SetRenderDrawColor( gfxRenderer, (col and &hff0000) shr 16, (col and &hff00) shr 8, col and &hff, SDL_ALPHA_OPAQUE )
+	SDL_RenderFillRect( gfxRenderer, @rect )
+
 END SUB
 
 '- LoadSprites
