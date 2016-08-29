@@ -111,20 +111,20 @@ DECLARE SUB _PULL_EVENTS()
 
 DIM SHARED rgbs(15) AS INTEGER
 rgbs( 0) = &h000000
-rgbs( 1) = &h0000bb
-rgbs( 2) = &h00bb00
-rgbs( 3) = &h00bbbb
-rgbs( 4) = &hbb0000
-rgbs( 5) = &hbb00bb
-rgbs( 6) = &hbb7700
-rgbs( 7) = &hbbbbbb
-rgbs( 8) = &h777777
-rgbs( 9) = &h7777ff
-rgbs(10) = &h77ff77
-rgbs(11) = &h77ffff
-rgbs(12) = &hff7777
-rgbs(13) = &hff00ff
-rgbs(14) = &hffff00
+rgbs( 1) = &h0000aa
+rgbs( 2) = &h00aa00
+rgbs( 3) = &h00aaaa
+rgbs( 4) = &haa0000
+rgbs( 5) = &haa00aa
+rgbs( 6) = &haa5500
+rgbs( 7) = &haaaaaa
+rgbs( 8) = &h555555
+rgbs( 9) = &h5555ff
+rgbs(10) = &h55ff55
+rgbs(11) = &h55ffff
+rgbs(12) = &hff5555
+rgbs(13) = &hff55ff
+rgbs(14) = &hffff55
 rgbs(15) = &hffffff
 
 DIM SHARED loc_x AS INTEGER
