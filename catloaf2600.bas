@@ -103,7 +103,7 @@ DECLARE SUB _COLOR(foreground AS INTEGER = -1, background AS INTEGER = -1)
 DECLARE SUB _CLS()
 DECLARE SUB _WAIT_FOR_KEY()
 DECLARE SUB _CLEAR_KEYS()
-DECLARE SUB _SLEEP()
+DECLARE SUB _SLEEP_()
 DECLARE SUB _COPY_SCREEN()
 DECLARE SUB _PULL_EVENTS()
 
@@ -129,9 +129,6 @@ DIM SHARED loc_x AS INTEGER
 DIM SHARED loc_y AS INTEGER
 DIM SHARED col_f AS INTEGER
 DIM SHARED col_b AS INTEGER
-
-CONST TRUE = 1
-CONST FALSE = 0
 
 CONST EMPTYSPACE = 0
 CONST CATLOAF = 1
@@ -175,14 +172,14 @@ SYS_Init
 
 DO
 
-    gameover = FALSE
+    gameover = 0
     
     MENU_Main
     
     RESTORE MapData
     DATA_LoadMap
     
-    IF gameover = TRUE THEN EXIT DO
+    IF gameover = 1 THEN EXIT DO
     
     GAME_Intro
 
@@ -229,9 +226,9 @@ SUB GAME_Main
     '- clear keyboard buffer
     _CLEAR_KEYS
     starttime = TIMER
-    quitgame = FALSE
+    quitgame = 0
     totaltime = -1
-    gameover = FALSE
+    gameover = 0
     
     DO
        
@@ -250,7 +247,7 @@ SUB GAME_Main
             
             _COLOR , 4
             GFX_WriteText "[    YOU GOT PWNED!!!    ]", 4, 15: _COPY_SCREEN
-            _SLEEP
+            _SLEEP_
             _COLOR , 1
             
             Player.lives = Player.lives - 1
@@ -302,8 +299,8 @@ SUB GAME_Main
             
                 _WAIT_FOR_KEY
                 
-                IF keydown = SDLK_Y THEN quitgame = TRUE: EXIT DO
-                IF keydown = SDLK_N THEN quitgame = FALSE: EXIT DO
+                IF keydown = SDLK_Y THEN quitgame = 1: EXIT DO
+                IF keydown = SDLK_N THEN quitgame = 0: EXIT DO
                 
             LOOP
             
@@ -315,7 +312,7 @@ SUB GAME_Main
             
         END IF
     
-    LOOP WHILE gameover = FALSE
+    LOOP WHILE gameover = 0
     
 END SUB
 
@@ -420,7 +417,7 @@ SUB GAME_ShowAbout
     GFX_WriteText "http://twitter.com/joekingus", 15, 15
     
     _COPY_SCREEN
-    _SLEEP
+    _SLEEP_
     
 END SUB
 
@@ -712,7 +709,7 @@ SUB _CLEAR_KEYS()
 
 END SUB
 
-SUB _SLEEP()
+SUB _SLEEP_()
 
 	_WAIT_FOR_KEY
 
@@ -782,7 +779,7 @@ SUB MENU_Main
         
         IF key = SDLK_F1 or key = SDLK_H THEN GAME_ShowHelp: GAME_DrawMap
         IF key = SDLK_A THEN GAME_ShowAbout
-        IF key = SDLK_ESCAPE THEN gameover = TRUE: EXIT DO
+        IF key = SDLK_ESCAPE THEN gameover = 1: EXIT DO
         IF key = SDLK_SPACE THEN EXIT DO
         
     LOOP
@@ -804,14 +801,14 @@ SUB GAME_Intro
     
     GFX_WriteText "MASTER  MEATLOAF", 3, 4
     
-    _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "CATLOAF!", 14, 15
-    _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "You found my labyrinth.", 14, 15
-    _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "I am close...", 14, 15
-    _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "...but death is closer.", 14, 15
-    _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "Did you think it would be easy?", 14, 15
-    _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "MUWAHAHA!!!", 14, 15
-    _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "Think again!", 14, 15
-    _COPY_SCREEN: _SLEEP
+    _COPY_SCREEN: _SLEEP_: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "CATLOAF!", 14, 15
+    _COPY_SCREEN: _SLEEP_: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "You found my labyrinth.", 14, 15
+    _COPY_SCREEN: _SLEEP_: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "I am close...", 14, 15
+    _COPY_SCREEN: _SLEEP_: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "...but death is closer.", 14, 15
+    _COPY_SCREEN: _SLEEP_: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "Did you think it would be easy?", 14, 15
+    _COPY_SCREEN: _SLEEP_: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "MUWAHAHA!!!", 14, 15
+    _COPY_SCREEN: _SLEEP_: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "Think again!", 14, 15
+    _COPY_SCREEN: _SLEEP_
     
 END SUB
 
@@ -835,38 +832,38 @@ SUB GAME_EndLevel
     
     GFX_WriteText "MASTER  MEATLOAF", 3, 4
     
-    _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "CATLOAF!", 14, 15
-    _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "You have survived my labyrinth...", 14, 15
-    _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "...which takes much skill.", 14, 15
+    _COPY_SCREEN: _SLEEP_: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "CATLOAF!", 14, 15
+    _COPY_SCREEN: _SLEEP_: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "You have survived my labyrinth...", 14, 15
+    _COPY_SCREEN: _SLEEP_: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "...which takes much skill.", 14, 15
     
     IF totaltime >= 300 THEN
-        _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "But you have taken too much time.", 14, 15
-        _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "Complete my labyrinth...", 14, 15
-        _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "...in less than 5 minutes.", 14, 15
-        _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "Only then can prove your l33tness.", 14, 15
+        _COPY_SCREEN: _SLEEP_: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "But you have taken too much time.", 14, 15
+        _COPY_SCREEN: _SLEEP_: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "Complete my labyrinth...", 14, 15
+        _COPY_SCREEN: _SLEEP_: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "...in less than 5 minutes.", 14, 15
+        _COPY_SCREEN: _SLEEP_: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "Only then can prove your l33tness.", 14, 15
     ELSEIF numItems < 3 THEN
-        _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "But there is more than meets the eye.", 14, 15
-        _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "There are 3 special items within.", 14, 15
+        _COPY_SCREEN: _SLEEP_: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "But there is more than meets the eye.", 14, 15
+        _COPY_SCREEN: _SLEEP_: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "There are 3 special items within.", 14, 15
         IF numItems = 0 THEN
-            _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "You have none.", 14, 15
-            _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "You must find them...", 14, 15
+            _COPY_SCREEN: _SLEEP_: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "You have none.", 14, 15
+            _COPY_SCREEN: _SLEEP_: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "You must find them...", 14, 15
         ELSE
-            _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "You only have " + STR$(numItems) + ".", 14, 15
-            _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "You must find the rest...", 14, 15
+            _COPY_SCREEN: _SLEEP_: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "You only have " + STR$(numItems) + ".", 14, 15
+            _COPY_SCREEN: _SLEEP_: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "You must find the rest...", 14, 15
         END IF
-        _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "...to prove your l33tness.", 14, 15
+        _COPY_SCREEN: _SLEEP_: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "...to prove your l33tness.", 14, 15
     ELSE
-        _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "Good job.", 14, 15
-        _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "I am not worthy of you.", 14, 15
-        _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "...", 14, 15
-        _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "What's a matter?", 14, 15
-        _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "Were you expecting a fight...", 14, 15
-        _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "...or an epic boss battle?", 14, 15
-        _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "MUWAHAHA!!!", 14, 15
-        _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "Think again!", 14, 15
+        _COPY_SCREEN: _SLEEP_: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "Good job.", 14, 15
+        _COPY_SCREEN: _SLEEP_: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "I am not worthy of you.", 14, 15
+        _COPY_SCREEN: _SLEEP_: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "...", 14, 15
+        _COPY_SCREEN: _SLEEP_: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "What's a matter?", 14, 15
+        _COPY_SCREEN: _SLEEP_: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "Were you expecting a fight...", 14, 15
+        _COPY_SCREEN: _SLEEP_: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "...or an epic boss battle?", 14, 15
+        _COPY_SCREEN: _SLEEP_: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "MUWAHAHA!!!", 14, 15
+        _COPY_SCREEN: _SLEEP_: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "Think again!", 14, 15
     END IF
     
-    _COPY_SCREEN: _SLEEP
+    _COPY_SCREEN: _SLEEP_
     
     GAME_GameOver
 
@@ -905,7 +902,7 @@ SUB GAME_GameOver
         numItems = player.inv.golddove + player.inv.suprmeye + player.inv.crystsnk
         IF numItems < 3 THEN
             
-            _COPY_SCREEN: _SLEEP
+            _COPY_SCREEN: _SLEEP_
             _CLS
             GFX_WriteText "You forgot something", 4, 15
             
@@ -930,7 +927,7 @@ SUB GAME_GameOver
         
         ELSE
             
-            _COPY_SCREEN: _SLEEP
+            _COPY_SCREEN: _SLEEP_
             _CLS
             GFX_WriteText "CONGRATULATIONS!", 4, 15
             GFX_WriteText "You found all the secret items", 6, 15
@@ -950,9 +947,9 @@ SUB GAME_GameOver
         
     END IF
     
-    _COPY_SCREEN: _SLEEP
+    _COPY_SCREEN: _SLEEP_
     
-    gameover = TRUE
+    gameover = 1
     
 END SUB
 
