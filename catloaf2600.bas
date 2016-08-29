@@ -47,8 +47,6 @@ dim shared game_font as GFONT
 
 dim shared keydown as integer
 
-'OPTION EXPLICIT
-
 TYPE tSprite
     
     strData(5) AS STRING
@@ -662,8 +660,13 @@ END SUB
 
 SUB _PRINT(text as string, cr AS INTEGER = 1)
 
-	GFX_FillBox loc_x*GFONT_W, loc_y*GFONT_H, loc_x*GFONT_W+len(text)*GFONT_W, loc_y*GFONT_H+GFONT_H, col_b
-    game_font.writeText(text, loc_x*GFONT_W, loc_y*GFONT_H)
+	dim top as integer, lft as integer
+	dim w as integer, h as integer
+	
+	top = loc_y*GFONT_H: w = len(text)*GFONT_W
+	lft = loc_x*GFONT_W: h = GFONT_H
+	GFX_FillBox lft, top, lft+w-1, top+h-1, col_b
+    game_font.writeText(text, lft, top)
 	
 	IF cr then
 		loc_y += 1
