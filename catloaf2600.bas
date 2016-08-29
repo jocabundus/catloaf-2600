@@ -291,7 +291,7 @@ SUB GAME_Main
         IF player.y < 0 THEN player.y = 4: player.gridy = player.gridy - 5: GAME_DrawMap: GAME_UpdatePlayer
     
         IF keydown = SDLK_TAB or keydown = SDLK_V THEN GAME_ShowInventory: GAME_DrawMap
-        IF keydown = SDLK_H THEN GAME_ShowHelp: GAME_DrawMap
+        IF keydown = SDLK_F1 or keydown = SDLK_H THEN GAME_ShowHelp: GAME_DrawMap
         IF keydown = SDLK_ESCAPE or keydown = SDLK_Q THEN
             
             _COLOR , 1
@@ -416,13 +416,10 @@ SUB GAME_ShowAbout
     
     GFX_WriteText "CATLOAF 2600", 3, 15
     
-    GFX_WriteText "Created by Joe King", 7, 15
+    GFX_WriteText "(C) 2007, 2017", 7, 15
     
-    GFX_WriteText "(C) 2007 - Delta Code", 15, 15
-    GFX_WriteText "http://deltacode.sytes.net", 17, 15
-    
-    GFX_WriteText " No, this game was NOT made by Atari", 22, 7
-    GFX_WriteText "It is a joke for nostalgia's sake", 23, 7
+    GFX_WriteText "Created by Joe King", 12, 15
+    GFX_WriteText "http://twitter.com/joekingus", 15, 15
     
     _COPY_SCREEN
     _SLEEP
@@ -635,9 +632,8 @@ SUB SYS_Init
     
     SDL_Init( SDL_INIT_VIDEO )
 	
-	gfxWindow = SDL_CreateWindow( "Window Name", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 0, 0, SDL_WINDOW_FULLSCREEN_DESKTOP )
-	gfxRenderer = SDL_CreateRenderer( gfxWindow, -1, SDL_RENDERER_SOFTWARE )
-	'SCREEN_X = int(SCREEN_Y*(SDL_GetWindowSurface(gfxWindow)->w/SDL_GetWindowSurface(gfxWindow)->h)) '// this resizes the width for widescreen or 3:4 screens
+	gfxWindow = SDL_CreateWindow( "Catloaf 2600: Master (Meatloaf) Edition", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 0, 0, SDL_WINDOW_FULLSCREEN_DESKTOP )
+	gfxRenderer = SDL_CreateRenderer( gfxWindow, -1, 0 )
 	SDL_RenderSetLogicalSize( gfxRenderer, SCREEN_X, SCREEN_Y )
 	SDL_SetRenderDrawBlendMode( gfxRenderer, SDL_BLENDMODE_BLEND )
 	
@@ -770,18 +766,18 @@ SUB MENU_Main
         _PRINT "----------------------------------------"
         GFX_DrawSprite 18, 8, CATLOAF
         GFX_WriteText "CATLOAF 2600", 3, 14
-        GFX_WriteText "1981 ATARI", 18, 9
+        GFX_WriteText "MASTER (MEATLOAF) EDITION", 18, 9
         GFX_WriteText "F1 How to Play", 21, 7
         GFX_WriteText "press space to begin", 23, 14
         GFX_WriteText "esc to exit", 24, 8
         
         _COPY_SCREEN
-            
+        
         _WAIT_FOR_KEY
         
         key = keydown
         
-        IF key = SDLK_H THEN GAME_ShowHelp
+        IF key = SDLK_F1 or key = SDLK_H THEN GAME_ShowHelp: GAME_DrawMap
         IF key = SDLK_A THEN GAME_ShowAbout
         IF key = SDLK_ESCAPE THEN gameover = TRUE: EXIT DO
         IF key = SDLK_SPACE THEN EXIT DO
@@ -806,8 +802,12 @@ SUB GAME_Intro
     GFX_WriteText "MASTER  MEATLOAF", 3, 4
     
     _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "CATLOAF!", 14, 15
-    _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "I have survived your predecessors...", 14, 15
-    _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "...and I will survive you!", 14, 15
+    _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "You found my labyrinth.", 14, 15
+    _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "I am close...", 14, 15
+    _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "...but death is closer.", 14, 15
+    _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "Did you think it would be easy?", 14, 15
+    _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "MUWAHAHA!!!", 14, 15
+    _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "Think again!", 14, 15
     _COPY_SCREEN: _SLEEP
     
 END SUB
@@ -832,38 +832,38 @@ SUB GAME_EndLevel
     
     GFX_WriteText "MASTER  MEATLOAF", 3, 4
     
-    _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "CATLOAF!", 14, 15
-    _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "You have survived my labyrinth...", 14, 15
-    _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "...which takes much skill.", 14, 15
+    _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "CATLOAF!", 14, 15
+    _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "You have survived my labyrinth...", 14, 15
+    _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "...which takes much skill.", 14, 15
     
     IF totaltime >= 300 THEN
-        _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "But you have taken too much time.", 14, 15
-        _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "Complete my labyrinth...", 14, 15
-        _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "...in less than 5 minutes.", 14, 15
-        _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "Only then can prove your l33tness.", 14, 15
+        _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "But you have taken too much time.", 14, 15
+        _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "Complete my labyrinth...", 14, 15
+        _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "...in less than 5 minutes.", 14, 15
+        _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "Only then can prove your l33tness.", 14, 15
     ELSEIF numItems < 3 THEN
-        _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "But there is more than meets the eye.", 14, 15
-        _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "There are 3 special items within.", 14, 15
+        _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "But there is more than meets the eye.", 14, 15
+        _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "There are 3 special items within.", 14, 15
         IF numItems = 0 THEN
-            _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "You have none.", 14, 15
-            _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "You must find them...", 14, 15
+            _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "You have none.", 14, 15
+            _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "You must find them...", 14, 15
         ELSE
-            _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "You only have " + STR$(numItems) + ".", 14, 15
-            _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "You must find the rest...", 14, 15
+            _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "You only have " + STR$(numItems) + ".", 14, 15
+            _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "You must find the rest...", 14, 15
         END IF
-        _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "...to prove your l33tness.", 14, 15
+        _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "...to prove your l33tness.", 14, 15
     ELSE
-        _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "Good job.", 14, 15
-        _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "I am not worthy of you.", 14, 15
-        _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "...", 14, 15
-        _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "What's a matter?", 14, 15
-        _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "Were you expecting a fight...", 14, 15
-        _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "...or an epic boss battle?", 14, 15
-        _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "MUWAHAHA!!!", 14, 15
-        _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "Think again!", 14, 15
+        _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "Good job.", 14, 15
+        _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "I am not worthy of you.", 14, 15
+        _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "...", 14, 15
+        _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "What's a matter?", 14, 15
+        _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "Were you expecting a fight...", 14, 15
+        _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "...or an epic boss battle?", 14, 15
+        _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "MUWAHAHA!!!", 14, 15
+        _COPY_SCREEN: _SLEEP: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "Think again!", 14, 15
     END IF
     
-    _SLEEP
+    _COPY_SCREEN: _SLEEP
     
     GAME_GameOver
 
@@ -1027,7 +1027,7 @@ SUB DATA_LoadSprites
         FOR y = 0 TO 4
             READ row
                 FOR x = 1 TO 5
-                    IF MID$(row, x, 1) = "#" THEN MID$(row, x, 1) = CHR$(219)
+                    IF MID$(row, x, 1) = "#" THEN MID$(row, x, 1) = CHR$(127)
                 NEXT x
             sprite(n).strData(y) = row
             READ sprite(n).col(y, 0)

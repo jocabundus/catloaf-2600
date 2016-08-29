@@ -5,7 +5,7 @@
 
 type GFont
 private:
-	_sprites(1024) as SDL_RECT
+	_sprites(96) as SDL_RECT
 	_sprites_w as integer = GFONT_W
 	_sprites_h as integer = GFONT_H
 	_sprite_offset as integer = 0
