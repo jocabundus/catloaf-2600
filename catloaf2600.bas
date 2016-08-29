@@ -902,7 +902,7 @@ SUB GAME_GameOver
         numItems = player.inv.golddove + player.inv.suprmeye + player.inv.crystsnk
         IF numItems < 3 THEN
             
-            _SLEEP
+            _COPY_SCREEN: _SLEEP
             _CLS
             GFX_WriteText "You forgot something", 4, 15
             
@@ -927,7 +927,7 @@ SUB GAME_GameOver
         
         ELSE
             
-            _SLEEP
+            _COPY_SCREEN: _SLEEP
             _CLS
             GFX_WriteText "CONGRATULATIONS!", 4, 15
             GFX_WriteText "You found all the secret items", 6, 15
@@ -947,7 +947,7 @@ SUB GAME_GameOver
         
     END IF
     
-    _SLEEP
+    _COPY_SCREEN: _SLEEP
     
     gameover = TRUE
     
