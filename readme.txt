@@ -77,8 +77,8 @@ play again to find those items.
 Credits:
 ------------------------------------------------------------
 
-Developed by Joe King
-(C) 2007 - Delta Code (http://deltacode.sytes.net)
+Developed by Joe King (http://twitter.com/joekingus)
+(C) 2007, 2016
 
 
 Enjoy!
