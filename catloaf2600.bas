@@ -1,6 +1,6 @@
 '- Catloaf 2600
-'- 2007 - Joe King
-'- Delta Code (http://deltacode.sytes.net)
+'- 2007, 2016 - Joe King
+'- http://twitter.com/joekingus
 '-----------------------------------------
 '-----------------------------------------
 
