@@ -692,6 +692,10 @@ SUB _PULL_EVENTS()
 			end
 		case SDL_KEYDOWN
 			keydown = event.key.keysym.sym
+		case SDL_WINDOWEVENT_FOCUS_GAINED
+			Game_DrawMap
+			Game_DrawPlayer
+			_COPY_SCREEN
 		end select
 	wend
 
@@ -728,6 +732,12 @@ END SUB
 '-
 '-\
 SUB SYS_ShutDown
+    
+    game_font.release()
+    SDL_DestroyRenderer( gfxRenderer )
+    SDL_DestroyWindow( gfxWindow )
+    
+    SDL_Quit
 
     SETMOUSE ,,1
 
