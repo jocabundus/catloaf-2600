@@ -11,7 +11,7 @@ Synopsis:
 ------------------------------------------------------------
 
 In Catloaf: 2600, you play the role of Catloaf.
-You're goal is to find your way out of Master Meatloaf's
+Your goal is to find your way out of Master Meatloaf's
 labyrinth. There are many traps and puzzles along the way.
 You must use your patience and intellect to complete the
 labyrinth.
