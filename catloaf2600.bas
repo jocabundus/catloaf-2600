@@ -866,7 +866,7 @@ SUB GAME_EndLevel
         _COPY_SCREEN: _SLEEP_: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "Good job.", 14, 15
         _COPY_SCREEN: _SLEEP_: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "I am not worthy of you.", 14, 15
         _COPY_SCREEN: _SLEEP_: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "...", 14, 15
-        _COPY_SCREEN: _SLEEP_: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "What's a matter?", 14, 15
+        _COPY_SCREEN: _SLEEP_: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "What's the matter?", 14, 15
         _COPY_SCREEN: _SLEEP_: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "Were you expecting a fight...", 14, 15
         _COPY_SCREEN: _SLEEP_: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "...or an epic boss battle?", 14, 15
         _COPY_SCREEN: _SLEEP_: _LOCATE 14, 1: _PRINT SPACE$(40), 0: GFX_WriteText "MUWAHAHA!!!", 14, 15
