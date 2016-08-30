@@ -692,9 +692,9 @@ SUB _PULL_EVENTS()
 			end
 		case SDL_KEYDOWN
 			keydown = event.key.keysym.sym
+		end select
+		select case event.window.event
 		case SDL_WINDOWEVENT_FOCUS_GAINED
-			Game_DrawMap
-			Game_DrawPlayer
 			_COPY_SCREEN
 		end select
 	wend
